@@ -10,9 +10,7 @@ $ npm install pkghub
 ### Example
 ````javascript
 var Hub = require('pkghub'),
-    hub = new Hub;
-
-console.log(hub.module);
+    hub = new Hub('-');
 
 // re-config devider
 pkghub.config({ devider: '/' });
@@ -22,7 +20,7 @@ pkghub.list(function(err, modules){
     console.log(modules);
 });
 
-// list selected plugin's package info(parsed)
+// list selected plugin's package info (parsed)
 pkghub.load('mua-wordpress', function(err, plugin){
     console.log(plugin) // load mua-wordpress as a plugin
 });
@@ -32,13 +30,8 @@ pkghub.plugins(function(err, plugins){
     console.log(plugins)
 });
 
-// search plugin by keyworld
-pkghub.search('plugin', function(err, plugins){
-    console.log(plugins)
-});
-
 // install selected module
-pkghub.install('mua-newplugin', function(err, logs, tree){
+pkghub.install('my-new-plugin', function(err, logs, tree){
     console.log(logs)
     console.log(tree)
 });
