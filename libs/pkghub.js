@@ -6,7 +6,6 @@ var npm = require("./npm"),
 
 var Hub = function() {
     this.settings = _.clone(settings);
-    this.list();
 };
 
 Hub.prototype.config = function(params) {
@@ -19,7 +18,6 @@ Hub.prototype.list = function(callback) {
     var self = this;
     return npm.ls(function(err, modules) {
         if (err) return callback(err);
-        console.log(modules);
         var dependencies = modules.dependencies;
         if (dependencies) {
             delete modules.dependencies;
@@ -48,13 +46,16 @@ Hub.prototype.load = function(name, callback) {
 
 // 搜索带有某些关键词的依赖模块
 Hub.prototype.search = function(keyword, callback) {
-    return this.list(function(err, modules) {
+    var self = this;
+    return self.list(function(err, modules) {
         if (err) return callback(err);
         if (!modules.dependencies) return callback(null, null);
         var result = {};
-        _.each(modules, function(dep, name) {
-            if (name.indexOf(keyword) > -1) result[name] = dep;
+        var k = keyword || modules.name + self.settings.devider;
+        Object.keys(modules.dependencies).forEach(function(name){
+            if (name.indexOf(k) > -1) result[name] = modules.dependencies[name];
         });
+        if (_.isEmpty(result)) return callback(err, null);
         return callback(err, result);
     });
 };
@@ -63,8 +64,7 @@ Hub.prototype.search = function(keyword, callback) {
 // 某个包的插件是以 devider 分割的模块名字
 // e.g: candy-editor 是 candy 的插件，此例中，插件包涵 `cady-` 字符串
 Hub.prototype.plugins = function(callback) {
-    var keyword = this.module.name + this.settings.devider;
-    return this.search(keyword, callback);
+    return this.search(null, callback);
 };
 
 // 返回这个包的某个插件的所有信息

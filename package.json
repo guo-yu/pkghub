@@ -25,9 +25,5 @@
   "dependencies": {
     "underscore": "*",
     "glob": "*"
-  },
-  "devDependencies": {
-    "mocha": "*",
-    "should": "*"
   }
 }
