@@ -1,0 +1,29 @@
+{
+  "name": "pkghub",
+  "version": "0.0.1",
+  "logo": "https://cdn1.iconfinder.com/data/icons/Momentum_MatteEntireSet/32/network-hub.png",
+  "description": "a package hub for human, based on NPM iteself.",
+  "main": "index.js",
+  "author": "turing <o.u.turing@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/turingou/pkghub.git"
+  },
+  "keywords": [
+    "plugin",
+    "plugins",
+    "module",
+    "loader"
+  ],  
+  "bugs": {
+    "url": "https://github.com/turingou/pkghub/issues"
+  },
+  "dependencies": {
+    "underscore": "*",
+    "glob": "*"
+  }
+}
