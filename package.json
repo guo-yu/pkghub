@@ -7,7 +7,7 @@
   "author": "turing <o.u.turing@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha ./test/test.js"
   },
   "repository": {
     "type": "git",
@@ -18,12 +18,16 @@
     "plugins",
     "module",
     "loader"
-  ],  
+  ],
   "bugs": {
     "url": "https://github.com/turingou/pkghub/issues"
   },
   "dependencies": {
     "underscore": "*",
     "glob": "*"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
   }
 }

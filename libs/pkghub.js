@@ -19,6 +19,7 @@ Hub.prototype.list = function(callback) {
     var self = this;
     return npm.ls(function(err, modules) {
         if (err) return callback(err);
+        console.log(modules);
         var dependencies = modules.dependencies;
         if (dependencies) {
             delete modules.dependencies;
@@ -56,7 +57,7 @@ Hub.prototype.search = function(keyword, callback) {
         });
         return callback(err, result);
     });
-});
+};
 
 // 返回一个模块的插件列表
 // 某个包的插件是以 devider 分割的模块名字
@@ -64,7 +65,7 @@ Hub.prototype.search = function(keyword, callback) {
 Hub.prototype.plugins = function(callback) {
     var keyword = this.module.name + this.settings.devider;
     return this.search(keyword, callback);
-}
+};
 
 // 返回这个包的某个插件的所有信息
 Hub.prototype.plugin = function(name, callback) {
@@ -77,7 +78,7 @@ Hub.prototype.plugin = function(name, callback) {
         if (!file) return callback(err, plugins[name]);
         return callback(err, plugins[file], finder.read(plugins[file], name));
     });
-}
+};
 
 // 安装一个包，并返回所有依赖
 Hub.prototype.install = function(modules, callback) {
