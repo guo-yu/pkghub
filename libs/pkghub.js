@@ -89,10 +89,10 @@ Hub.prototype.themes = function(callback) {
 };
 
 // 安装一个包，并返回所有依赖
-Hub.prototype.install = function(modules, callback) {
+Hub.prototype.install = function(modules, callback, dir) {
     var self = this;
     if (_.isString(modules)) modules = [modules];
-    return npm.install(modules, function(err, logs) {
+    return npm.install(dir, modules, function(err, logs) {
         if (err) return callback(err);
         return self.list(function(err, modules) {
             callback(err, logs, modules);
