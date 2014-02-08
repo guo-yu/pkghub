@@ -1,8 +1,11 @@
 var npm = require("npm"),
     _ = require('underscore');
 
+var config = {};
+config.loglevel = 'silent';
+
 exports.load = function(callback) {
-    return npm.load({}, callback);
+    return npm.load(config, callback);
 }
 
 exports.ls = function(callback) {
