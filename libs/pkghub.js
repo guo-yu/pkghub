@@ -85,11 +85,11 @@ Hub.prototype.find = function(name, modules, callback) {
 // 模块名称可以是全名，也可以是部分名
 // 模块名称可以包涵名称和子文件，比如 candy 或 candy/template.html
 // e.g: name = 'candy/tpl.html', file === tpl.html;
-Hub.prototype.load = function(name, callback) {
+Hub.prototype.load = function(name, callback, force) {
     var self = this,
     var cache = self.module;
     // 如果有缓存，返回缓存内容，这里还应该判断缓存时间, 比如大于多少天自动更新之类
-    if (self.cached) return self.find(name, cache, callback);
+    if (self.cached && !force) return self.find(name, cache, callback);
     // 如果没有缓存，第一次生成缓存
     return this.list(function(err, modules) {
         if (err) return callback(err);
