@@ -11,6 +11,8 @@ exports.pkgname = function(name) {
 
 // 获取 / 后的文件名
 exports.file = function(name) {
+    if (!name) return false;
+    if (name.indexOf('/') === -1) return false;
     return name.substr(name.indexOf('/') + 1);
 };
 
