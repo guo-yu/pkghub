@@ -3,6 +3,7 @@ var npm = require("npm"),
 
 var config = {};
 config.loglevel = 'silent';
+config.parseable = true;
 
 exports.load = function(callback) {
     return npm.load(config, callback);
