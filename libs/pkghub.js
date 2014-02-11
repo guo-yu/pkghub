@@ -42,7 +42,8 @@ Hub.prototype.list = function(callback) {
 Hub.prototype.keywords = function(shortcut, name) {
     var devider = this.settings.devider;
     var shortcuts = {
-        '__pkghub_plugins': name + devider,
+        '__pkghub_addons': name + devider,
+        '__pkghub_plugins': name + devider + 'plugin' + devider,
         '__pkghub_themes': name + devider + 'theme' + devider
     }
     return shortcuts[shortcut];
@@ -101,9 +102,15 @@ Hub.prototype.load = function(name, callback, force) {
     });
 };
 
+// 返回一个模块的相关模块，包括插件和主题
+// e.g: candy-editor 是 candy 的插件，此例中，插件包涵 `candy-` 字符串
+Hub.prototype.addons = function(callback) {
+    return this.load('__pkghub_addons', callback);
+};
+
 // 返回一个模块的插件列表
 // 某个包的插件是以 devider 分割的模块名字
-// e.g: candy-editor 是 candy 的插件，此例中，插件包涵 `candy-` 字符串
+// e.g: candy-editor 是 candy 的插件，此例中，插件包涵 `candy-plugin` 字符串
 Hub.prototype.plugins = function(callback) {
     return this.load('__pkghub_plugins', callback);
 };
