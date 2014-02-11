@@ -60,8 +60,8 @@ Hub.prototype.find = function(name, modules, callback) {
 
     // 分离模块名称和模板名称
     // e.g: candy-theme-default/index => candy-theme-default
-    var pkgname = finder.pkgname(name);
-    var filename = finder.file(name);
+    var pkgname = finder.split(name);
+    var filename = finder.split(name, 'filename');
 
     if (pkgname && filename) {
         var m = modules.dependencies[pkgname] || null;
@@ -90,6 +90,8 @@ Hub.prototype.load = function(name, callback, force) {
     var self = this;
     var cache = self.module;
     // 如果有缓存，返回缓存内容，这里还应该判断缓存时间, 比如大于多少天自动更新之类
+    // 这里可能出现一个 bug，就是前后查询条件不符合
+    // 这样 hub 可能会缓存到不正确的结果
     if (self.cached && !force) return self.find(name, cache, callback);
     // 如果没有缓存，第一次生成缓存
     return this.list(function(err, modules) {
@@ -123,5 +125,7 @@ Hub.prototype.install = function(modules, callback, dir) {
         });
     });
 };
+
+Hub.prototype.finder = finder;
 
 exports = module.exports = Hub;
