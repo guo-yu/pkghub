@@ -1,13 +1,12 @@
 {
   "name": "pkghub",
-  "version": "0.0.5",
-  "logo": "https://cdn1.iconfinder.com/data/icons/Momentum_MatteEntireSet/32/network-hub.png",
+  "version": "0.1.0",
   "description": "a package hub for human, based on NPM iteself.",
   "main": "index.js",
   "author": "turing <o.u.turing@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha ./test/test.js"
+    "test": "node_modules/mocha/bin/mocha tests/*.js"
   },
   "repository": {
     "type": "git",

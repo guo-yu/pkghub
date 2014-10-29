@@ -1,1 +1,1 @@
-exports = module.exports = require('./libs/pkghub.js');
+module.exports = require('./libs/pkghub.js');
