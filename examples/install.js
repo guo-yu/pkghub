@@ -1,6 +1,6 @@
-var Hub = require('../index');
-var hub = new Hub;
+var Hub = require('../dist/pkghub')
+var hub = new Hub
 
-hub.install('underscore', function(err, result) {
+hub.install('underscore').then(function(err, result) {
   console.log(result)
-});
+})

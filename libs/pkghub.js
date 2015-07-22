@@ -30,7 +30,7 @@ const defaults = {
   ]
 }
 
-export default class pkgHub() {
+export default class pkgHub {
   constructor(devider = '-') {
     this.module = {}
     this.module.dependencies = {}

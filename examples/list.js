@@ -1,7 +1,6 @@
-var Hub = require('../index');
-var hub = new Hub;
+var Hub = require('../dist/pkghub')
+var hub = new Hub
 
-hub.list(function(err, modules) {
-  if (err) return console.log(err);
-  console.log(modules);
-});
+hub.list().then(function(modules) {
+  console.log(modules)
+})

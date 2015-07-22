@@ -9,11 +9,11 @@ const config = {
 
 export function load() {
   return new Promise((res, rej) => {
-    npm.load(config, (err, n){
+    npm.load(config, (err, n) => {
       if (err)
         return rej(err)
 
-      retun res(n)
+      return res(n)
     })
   })
 }

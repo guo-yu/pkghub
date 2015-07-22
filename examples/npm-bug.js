@@ -1,4 +1,4 @@
-var npm = require("npm");
+var npm = require('npm')
 
 var config = {};
 config.loglevel = 'silent';
