@@ -1,7 +1,6 @@
 import _ from 'underscore'
 import Promise from 'bluebird'
-import npm from './npm'
-import utils from './utils'
+import * as npm from './npm'
 import * as finder from './finder'
 
 const defaults = {
@@ -96,15 +95,15 @@ export default class pkgHub {
       if (pkgname && filename) {
         var m = modules.dependencies[pkgname] || null
         if (!m || !m.realPath) 
-          return resolve(m)
+          return reject(new Error(`No module ${pkgname} was found`))
 
         return resolve({
           module: m,
-          path: finder.read(m.realPath, filename)
+          filePath: finder.read(m.realPath, filename)
         })
       }
 
-      // 如果找不到 / 而且不匹配任何模块，进行搜索
+      // 如果找不到 `/` 而且不匹配任何模块，进行搜索
       var result = {}
       var keyword = this.keywords(name, modules.name) || name
 
@@ -114,7 +113,7 @@ export default class pkgHub {
       })
 
       if (_.isEmpty(result)) 
-        return resolve(null)
+        return reject(`No module ${name} was found`)
 
       var availables = Object.keys(result)
       if (availables.length === 1) 
@@ -135,19 +134,14 @@ export default class pkgHub {
     // 这里可能出现一个 bug，就是前后查询条件不符合
     // 这样 hub 可能会缓存到不正确的结果
     if (this.cached && !force) 
-      return this.find(name, cache, callback)
+      return this.find(name, cache)
 
     // 如果没有缓存，第一次生成缓存
-    return new Promise((resolve, reject) => {
-      this.list().then(modules => {
-        if (!modules.dependencies) 
-          return resolve()
+    return this.list().then(modules => {
+      if (!modules.dependencies) 
+        return Promise.reject(new Error(`No module ${name} was found`))
 
-        return this.find(name, modules)
-          .then(resolve)
-          .catch(reject)
-
-      }).catch(reject)
+      return this.find(name, modules)
     })
   }
 

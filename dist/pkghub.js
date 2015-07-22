@@ -18,17 +18,13 @@ var _Promise = require('bluebird');
 
 var _Promise2 = _interopRequireWildcard(_Promise);
 
-var _npm = require('./npm');
+var _import3 = require('./npm');
 
-var _npm2 = _interopRequireWildcard(_npm);
+var npm = _interopRequireWildcard(_import3);
 
-var _utils = require('./utils');
+var _import4 = require('./finder');
 
-var _utils2 = _interopRequireWildcard(_utils);
-
-var _import3 = require('./finder');
-
-var finder = _interopRequireWildcard(_import3);
+var finder = _interopRequireWildcard(_import4);
 
 var defaults = {
   devider: '-',
@@ -62,7 +58,7 @@ var pkgHub = (function () {
     value: function list() {
       var _this = this;
 
-      return _npm2['default'].ls().then(function (packages) {
+      return npm.ls().then(function (packages) {
         var modules = _import2['default'].clone(packages);
         var dependencies = modules.dependencies;
 
@@ -116,15 +112,15 @@ var pkgHub = (function () {
 
         if (pkgname && filename) {
           var m = modules.dependencies[pkgname] || null;
-          if (!m || !m.realPath) return resolve(m);
+          if (!m || !m.realPath) return reject(new Error('No module ' + pkgname + ' was found'));
 
           return resolve({
             module: m,
-            path: finder.read(m.realPath, filename)
+            filePath: finder.read(m.realPath, filename)
           });
         }
 
-        // 如果找不到 / 而且不匹配任何模块，进行搜索
+        // 如果找不到 `/` 而且不匹配任何模块，进行搜索
         var result = {};
         var keyword = _this2.keywords(name, modules.name) || name;
 
@@ -132,7 +128,7 @@ var pkgHub = (function () {
           if (name.indexOf(keyword) > -1) result[name] = modules.dependencies[name];
         });
 
-        if (_import2['default'].isEmpty(result)) return resolve(null);
+        if (_import2['default'].isEmpty(result)) return reject('No module ' + name + ' was found');
 
         var availables = Object.keys(result);
         if (availables.length === 1) return resolve(result[availables[0]]);
@@ -156,14 +152,12 @@ var pkgHub = (function () {
       // 这里可能出现一个 bug，就是前后查询条件不符合
       // 这样 hub 可能会缓存到不正确的结果
       if (this.cached && !force) {
-        return this.find(name, cache, callback);
+        return this.find(name, cache);
       } // 如果没有缓存，第一次生成缓存
-      return new _Promise2['default'](function (resolve, reject) {
-        _this3.list().then(function (modules) {
-          if (!modules.dependencies) return resolve();
+      return this.list().then(function (modules) {
+        if (!modules.dependencies) return _Promise2['default'].reject(new Error('No module ' + name + ' was found'));
 
-          return _this3.find(name, modules).then(resolve)['catch'](reject);
-        })['catch'](reject);
+        return _this3.find(name, modules);
       });
     }
   }, {
@@ -200,7 +194,7 @@ var pkgHub = (function () {
 
       if (_import2['default'].isString(modules)) modules = [modules];
 
-      return _npm2['default'].install(modules, dir).then(function (logs) {
+      return npm.install(modules, dir).then(function (logs) {
         return _this4.list();
       });
     }

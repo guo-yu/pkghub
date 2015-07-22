@@ -23,10 +23,8 @@ var _glob = require('glob');
 var _glob2 = _interopRequireWildcard(_glob);
 
 function split(name, isFilename) {
-  if (!name) {
-    return false;
-  }if (name.indexOf('/') === -1) {
-    return false;
+  if (!name || name.indexOf('/') === -1) {
+    return;
   }if (!isFilename) {
     return name.substr(0, name.indexOf('/'));
   }return name.substr(name.indexOf('/') + 1);
