@@ -1,165 +1,208 @@
-var npm = require("./npm");
-var _ = require('underscore');
-var utils = require('./utils');
-var finder = require('./finder');
-var settings = require('./settings');
+import _ from 'underscore'
+import Promise from 'bluebird'
+import npm from "./npm"
+import utils from './utils'
+import finder from './finder'
 
-module.exports = Hub;
-
-function Hub(devider) {
-  this.settings = _.clone(settings);
-  this.module = {};
-  this.module.dependencies = {};
-  if (devider) 
-    this.settings.devider = devider;
-};
-
-// 配置分隔符
-Hub.prototype.config = function(params) {
-  if (params) 
-    this.settings = _.extend(this.settings, params);
-
-  return this.settings;
-};
-
-// 列出所有依赖模块
-Hub.prototype.list = function(callback) {
-  var self = this;
-  return npm.ls(function(err, packages) {
-    if (err) 
-      return callback(err);
-
-    var modules = _.clone(packages);
-    var dependencies = modules.dependencies;
-
-    if (dependencies) {
-      delete modules.dependencies;
-      _.each(dependencies, function(module, name) {
-        dependencies[name] = utils.wash(module);
-      });
-    }
-
-    modules = utils.wash(modules);
-    modules.dependencies = dependencies;
-
-    self.module = modules;
-    self.cached = new Date();
-
-    if (!callback) return;
-
-    return callback(err, modules);
-  });
-};
-
-Hub.prototype.keywords = function(shortcut, name) {
-  var devider = this.settings.devider;
-  var shortcuts = {
-    '__pkghub_addons': name + devider,
-    '__pkghub_plugins': name + devider + 'plugin' + devider,
-    '__pkghub_themes': name + devider + 'theme' + devider
-  }
-  return shortcuts[shortcut];
+const defaults = {
+  devider: '-',
+  includes: [
+    'name',
+    'version',
+    'logo',
+    'styles',
+    'fonts',
+    'javascripts',
+    'static',
+    'screenshot',
+    'description',
+    'main',
+    'repository',
+    'keywords',
+    'author',
+    'license',
+    'bugs',
+    'readme',
+    'path',
+    'depth',
+    'realPath',
+    'view engine'
+  ]
 }
 
-Hub.prototype.find = function(name, modules, callback) {
+export default class Hub() {
+  constructor(devider = '-') {
+    this.module = {}
+    this.module.dependencies = {}
+    this.settings = _.clone(defaults)
+    this.settings.devider = devider
+  }
+
+  // 配置分隔符
+  config(params = {}) {
+    this.settings = _.extend(defaults, params)
+    return this.settings
+  }
+
+  // 列出所有依赖模块
+  list() {
+    return new Promise((resolve, reject) => {
+      npm.ls((err, packages) => {
+        if (err) 
+          return reject(err)
+
+        var modules = _.clone(packages)
+        var dependencies = modules.dependencies
+
+        if (dependencies) {
+          delete modules.dependencies
+          _.each(dependencies, function(module, name) {
+            dependencies[name] = wash(module)
+          })
+        }
+
+        modules = wash(modules)
+        modules.dependencies = dependencies
+
+        this.module = modules
+        this.cached = new Date()
+
+        return resolve(modules)
+      })
+    })
+  }
+
+  keywords(shortcut, name) {
+    const devider = this.settings.devider
+    const shortcuts = {
+      '__pkghub_addons': name + devider,
+      '__pkghub_plugins': name + devider + 'plugin' + devider,
+      '__pkghub_themes': name + devider + 'theme' + devider
+    }
+
+    return shortcuts[shortcut]
+  }
+
   // 这里要加一层缓存，不要每次都去 list 一遍模块
   // 因为 npm 有个问题同时调用两次 load list 会报错。
   // 这样的话如果在路由里使用基本不现实
+  find(name, modules) {
+    return new Promise((resolve, reject) => {
+      // 先判断是否完全匹配模块名称
+      var pkg = modules.dependencies[name]
+      if (pkg) 
+        return resolve(pkg)
 
-  // 先判断是否完全匹配模块名称
-  var pkg = modules.dependencies[name];
-  if (pkg) 
-    return callback(null, pkg);
+      // 分离模块名称和模板名称
+      // e.g: candy-theme-default/index => candy-theme-default
+      var pkgname = finder.split(name)
+      var filename = finder.split(name, 'filename')
 
-  // 分离模块名称和模板名称
-  // e.g: candy-theme-default/index => candy-theme-default
-  var pkgname = finder.split(name);
-  var filename = finder.split(name, 'filename');
+      if (pkgname && filename) {
+        var m = modules.dependencies[pkgname] || null
+        if (!m || !m.realPath) 
+          return resolve(m)
 
-  if (pkgname && filename) {
-    var m = modules.dependencies[pkgname] || null;
-    if (!m || !m.realPath) 
-      return callback(null, m);
+        return resolve({
+          module: m,
+          path: finder.read(m.realPath, filename)
+        })
+      }
 
-    return callback(null, m, finder.read(m.realPath, filename));
+      // 如果找不到 / 而且不匹配任何模块，进行搜索
+      var result = {}
+      var keyword = this.keywords(name, modules.name) || name
+
+      Object.keys(modules.dependencies).forEach(name => {
+        if (name.indexOf(keyword) > -1) 
+          result[name] = modules.dependencies[name]
+      })
+
+      if (_.isEmpty(result)) 
+        return resolve(null)
+
+      var availables = Object.keys(result)
+      if (availables.length === 1) 
+        return resolve(result[availables[0]])
+
+      return resolve(result)
+    })
   }
 
-  // 如果找不到 / 而且不匹配任何模块，进行搜索
-  var result = {};
-  var keyword = this.keywords(name, modules.name) || name;
+  // 加载某一个模块
+  // 模块名称可以是全名，也可以是部分名
+  // 模块名称可以包涵名称和子文件，比如 candy 或 candy/template.html
+  // e.g: name = 'candy/tpl.html', file === tpl.html;
+  load(name, force) {
+    var cache = this.module
 
-  Object.keys(modules.dependencies).forEach(function(name) {
-    if (name.indexOf(keyword) > -1) result[name] = modules.dependencies[name];
-  });
+    // 如果有缓存，返回缓存内容，这里还应该判断缓存时间, 比如大于多少天自动更新之类
+    // 这里可能出现一个 bug，就是前后查询条件不符合
+    // 这样 hub 可能会缓存到不正确的结果
+    if (this.cached && !force) 
+      return this.find(name, cache, callback)
 
-  if (_.isEmpty(result)) 
-    return callback(null, null);
+    // 如果没有缓存，第一次生成缓存
+    return new Promise((resolve, reject) => {
+      this.list().then(modules => {
+        if (!modules.dependencies) 
+          return resolve()
 
-  var availables = Object.keys(result);
-  if (availables.length === 1) 
-    return callback(null, result[availables[0]])
+        return this.find(name, modules)
+          .then(resolve)
+          .catch(reject)
 
-  return callback(null, result);
+      }).catch(reject)
+    })
+  }
 
+  // 返回一个模块的相关模块，包括插件和主题
+  // e.g: candy-editor 是 candy 的插件，此例中，插件包涵 `candy-` 字符串
+  addons() {
+    return this.load('__pkghub_addons')
+  }
+
+  // 返回一个模块的插件列表
+  // 某个包的插件是以 devider 分割的模块名字
+  // e.g: candy-editor 是 candy 的插件，此例中，插件包涵 `candy-plugin` 字符串
+  plugins() {
+    return this.load('__pkghub_plugins')
+  }
+
+  // 返回一个模块的主题列表
+  // e.g:  candy-theme-balbala 会被返回
+  themes() {
+    return this.load('__pkghub_themes')
+  }
+
+  // 安装一个包，并返回所有依赖
+  install(modules, dir) {
+    if (_.isString(modules)) 
+      modules = [ modules ]
+
+    return npm.install(dir, modules, (err, logs) => {
+      if (err) 
+        return callback(err)
+      
+      return this.list(function(err, modules) {
+        callback(err, logs, modules)
+      })
+    })
+  }
+
+  finder() {
+    return finder.apply(finder, arguments)
+  }
 }
 
-// 加载某一个模块
-// 模块名称可以是全名，也可以是部分名
-// 模块名称可以包涵名称和子文件，比如 candy 或 candy/template.html
-// e.g: name = 'candy/tpl.html', file === tpl.html;
-Hub.prototype.load = function(name, callback, force) {
-  var self = this;
-  var cache = self.module;
-  // 如果有缓存，返回缓存内容，这里还应该判断缓存时间, 比如大于多少天自动更新之类
-  // 这里可能出现一个 bug，就是前后查询条件不符合
-  // 这样 hub 可能会缓存到不正确的结果
-  if (self.cached && !force) 
-    return self.find(name, cache, callback);
+// 清理 NPM 返回的包信息中不需要的部分
+function wash(obj) {
+  var washed = {}
 
-  // 如果没有缓存，第一次生成缓存
-  return this.list(function(err, modules) {
-    if (err) 
-      return callback(err);
+  defaults.includes.forEach(key => {
+    if (obj[key]) 
+      washed[key] = obj[key]
+  })
 
-    if (!modules.dependencies) 
-      return callback(null, null);
-
-    return self.find(name, modules, callback);
-  });
-};
-
-// 返回一个模块的相关模块，包括插件和主题
-// e.g: candy-editor 是 candy 的插件，此例中，插件包涵 `candy-` 字符串
-Hub.prototype.addons = function(callback) {
-  return this.load('__pkghub_addons', callback);
-};
-
-// 返回一个模块的插件列表
-// 某个包的插件是以 devider 分割的模块名字
-// e.g: candy-editor 是 candy 的插件，此例中，插件包涵 `candy-plugin` 字符串
-Hub.prototype.plugins = function(callback) {
-  return this.load('__pkghub_plugins', callback);
-};
-
-// 返回一个模块的主题列表
-// e.g:  candy-theme-balbala 会被返回
-Hub.prototype.themes = function(callback) {
-  return this.load('__pkghub_themes', callback);
-};
-
-// 安装一个包，并返回所有依赖
-Hub.prototype.install = function(modules, callback, dir) {
-  var self = this;
-  if (_.isString(modules)) modules = [modules];
-
-  return npm.install(dir, modules, function(err, logs) {
-    if (err) 
-      return callback(err);
-    
-    return self.list(function(err, modules) {
-      callback(err, logs, modules);
-    });
-  });
-};
-
-Hub.prototype.finder = finder;
+  return washed
+}

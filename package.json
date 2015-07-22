@@ -22,6 +22,7 @@
     "url": "https://github.com/turingou/pkghub/issues"
   },
   "dependencies": {
+    "bluebird": "^2.9.34",
     "glob": "5.0.14",
     "underscore": "^1.8.3"
   },
