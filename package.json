@@ -2,7 +2,7 @@
   "name": "pkghub",
   "version": "0.1.0",
   "description": "a package hub for human, based on NPM iteself.",
-  "main": "index.js",
+  "main": "dist/pkghub.js",
   "author": "turing <o.u.turing@gmail.com>",
   "license": "MIT",
   "scripts": {
@@ -22,11 +22,11 @@
     "url": "https://github.com/turingou/pkghub/issues"
   },
   "dependencies": {
-    "underscore": "*",
-    "glob": "*"
+    "glob": "5.0.14",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "mocha": "*",
-    "should": "*"
+    "mocha": "^2.2.5",
+    "should": "^7.0.2"
   }
 }
