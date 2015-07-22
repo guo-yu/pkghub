@@ -1,6 +1,6 @@
 {
   "name": "pkghub",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "a package hub for human, based on NPM iteself.",
   "main": "dist/pkghub.js",
   "author": "turing <o.u.turing@gmail.com>",
@@ -25,6 +25,7 @@
   "dependencies": {
     "bluebird": "2.9.34",
     "glob": "5.0.14",
+    "npm": "^2.13.1",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
