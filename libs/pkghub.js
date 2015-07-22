@@ -1,6 +1,6 @@
 import _ from 'underscore'
 import Promise from 'bluebird'
-import npm from "./npm"
+import npm from './npm'
 import utils from './utils'
 import * as finder from './finder'
 

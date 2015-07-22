@@ -1,4 +1,4 @@
-import npm from "npm"
+import npm from 'npm'
 import _ from 'underscore'
 import Promise from 'bluebird'
 

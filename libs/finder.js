@@ -3,10 +3,8 @@ import path from 'path'
 import glob from 'glob'
 
 export function split(name, isFilename) {
-  if (!name) 
-    return false
-  if (name.indexOf('/') === -1) 
-    return false
+  if (!name || name.indexOf('/') === -1) 
+    return
   if (!isFilename) 
     return name.substr(0, name.indexOf('/'))
 
@@ -20,8 +18,8 @@ export function read(abs, name) {
 
   var dir = path.join(abs, name)
   var file = {
-    name: name,
-    dir: dir,
+    name,
+    dir,
     exist: fs.existsSync(dir)
   }
 
