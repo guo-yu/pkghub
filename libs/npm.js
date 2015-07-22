@@ -1,34 +1,54 @@
 import npm from "npm"
 import _ from 'underscore'
+import Promise from 'bluebird'
 
 const config = {
   loglevel: 'silent',
   parseable: true
 }
 
-export function load(callback) {
-  return npm.load(config, callback)
-}
+export function load() {
+  return new Promise((res, rej) => {
+    npm.load(config, (err, n){
+      if (err)
+        return rej(err)
 
-export function ls(callback) {
-  return exports.load(function(err, npm) {
-    if (err) 
-      return callback(err)
-
-    return npm.commands.ls([], true, callback)
+      retun res(n)
+    })
   })
 }
 
-export function install(dir, modules, callback) {
-  if (!_.isArray(modules)) 
-    return callback(new Error('modules name must be array'))
+export function ls() {
+  return load().then(npmInstance => {
+    return new Promise((res, rej) => {
+      npmInstance.commands.ls([], true, (err, modules) => {
+        if (err)
+          return rej(err)
 
-  return exports.load(function(err, npm) {
-    if (err) 
-      return callback(err)
-    if (!dir) 
-      return npm.commands.install(modules, callback)
+        return res(modules)
+      })
+    })
+  })
+}
 
-    return npm.commands.install(dir, modules, callback)
+export function install(modules, dir) {
+  return load().then(n => {
+    return new Promise((res, rej) => {
+      if (!_.isArray(modules)) 
+        return rej(new Error('Modules name must be array'))
+
+      const params = dir ? 
+        [ dir, modules, callback ] : 
+        [ modules, callback ];
+
+      return n.commands.install.apply(n, params)
+
+      function callback(err, result) {
+        if (err)
+          return rej(err)
+
+        return res(result)
+      }
+    })
   })
 }

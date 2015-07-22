@@ -2,7 +2,7 @@ import _ from 'underscore'
 import Promise from 'bluebird'
 import npm from "./npm"
 import utils from './utils'
-import finder from './finder'
+import * as finder from './finder'
 
 const defaults = {
   devider: '-',
@@ -30,7 +30,7 @@ const defaults = {
   ]
 }
 
-export default class Hub() {
+export default class pkgHub() {
   constructor(devider = '-') {
     this.module = {}
     this.module.dependencies = {}
@@ -38,7 +38,6 @@ export default class Hub() {
     this.settings.devider = devider
   }
 
-  // 配置分隔符
   config(params = {}) {
     this.settings = _.extend(defaults, params)
     return this.settings
@@ -46,29 +45,25 @@ export default class Hub() {
 
   // 列出所有依赖模块
   list() {
-    return new Promise((resolve, reject) => {
-      npm.ls((err, packages) => {
-        if (err) 
-          return reject(err)
+    return npm.ls().then(packages => {
+      var modules = _.clone(packages)
+      var dependencies = modules.dependencies
 
-        var modules = _.clone(packages)
-        var dependencies = modules.dependencies
+      if (dependencies) {
+        delete modules.dependencies
 
-        if (dependencies) {
-          delete modules.dependencies
-          _.each(dependencies, function(module, name) {
-            dependencies[name] = wash(module)
-          })
-        }
+        _.each(dependencies, function(module, name) {
+          dependencies[name] = wash(module)
+        })
+      }
 
-        modules = wash(modules)
-        modules.dependencies = dependencies
+      modules = wash(modules)
+      modules.dependencies = dependencies
 
-        this.module = modules
-        this.cached = new Date()
+      this.module = modules
+      this.cached = new Date()
 
-        return resolve(modules)
-      })
+      return Promise.resolve(modules)
     })
   }
 
@@ -180,18 +175,9 @@ export default class Hub() {
     if (_.isString(modules)) 
       modules = [ modules ]
 
-    return npm.install(dir, modules, (err, logs) => {
-      if (err) 
-        return callback(err)
-      
-      return this.list(function(err, modules) {
-        callback(err, logs, modules)
-      })
+    return npm.install(modules, dir).then(logs => {
+      return this.list()
     })
-  }
-
-  finder() {
-    return finder.apply(finder, arguments)
   }
 }
 
