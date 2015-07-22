@@ -16,23 +16,22 @@ var hub = new Hub('-')
 pkghub.config({ devider: '/' })
 
 // list packages' tree (parsed json)
-pkghub.list(function(err, modules) {
-  console.log(modules);
+pkghub.list().then(function(modules) {
+  console.log(modules)
 })
 
 // list selected plugin's package info (parsed)
-pkghub.load('mua-wordpress', function(err, plugin) {
+pkghub.load('mua-wordpress').then(function(plugin) {
   console.log(plugin) // load mua-wordpress as a plugin
 })
 
 // list plugins devided by '-'
-pkghub.plugins(function(err, plugins) {
+pkghub.plugins().then(function(plugins) {
   console.log(plugins)
 })
 
 // install selected module
-pkghub.install('my-new-plugin', function(err, logs, tree) {
-  console.log(logs)
+pkghub.install('my-new-plugin').then(function(tree) {
   console.log(tree)
 })
 ```
