@@ -1,44 +1,41 @@
-## ![logo](https://cdn1.iconfinder.com/data/icons/Momentum_MatteEntireSet/32/network-hub.png) pkghub ![npm](https://badge.fury.io/js/pkghub.png)
+## ![pkghub](https://cdn1.iconfinder.com/data/icons/Momentum_MatteEntireSet/32/network-hub.png) pkghub ![npm](https://badge.fury.io/js/pkghub.png)
 
-a package hub for human, based on NPM iteself.
+a package hub for human, based on NPM itself
 
 ### Installation
-````
+```bash
 $ npm install pkghub
-````
+```
 
 ### Example
-````javascript
-var Hub = require('pkghub'),
-    hub = new Hub('-');
+```js
+var Hub = require('pkghub')
+var hub = new Hub('-')
 
 // re-config devider
-pkghub.config({ devider: '/' });
+pkghub.config({ devider: '/' })
 
 // list packages' tree (parsed json)
-pkghub.list(function(err, modules){
-    console.log(modules);
-});
+pkghub.list(function(err, modules) {
+  console.log(modules);
+})
 
 // list selected plugin's package info (parsed)
-pkghub.load('mua-wordpress', function(err, plugin){
-    console.log(plugin) // load mua-wordpress as a plugin
-});
+pkghub.load('mua-wordpress', function(err, plugin) {
+  console.log(plugin) // load mua-wordpress as a plugin
+})
 
 // list plugins devided by '-'
-pkghub.plugins(function(err, plugins){
-    console.log(plugins)
-});
+pkghub.plugins(function(err, plugins) {
+  console.log(plugins)
+})
 
 // install selected module
-pkghub.install('my-new-plugin', function(err, logs, tree){
-    console.log(logs)
-    console.log(tree)
-});
-````
-
-### API
-check this file: `index.js`
+pkghub.install('my-new-plugin', function(err, logs, tree) {
+  console.log(logs)
+  console.log(tree)
+})
+```
 
 ### Contributing
 - Fork this repo
