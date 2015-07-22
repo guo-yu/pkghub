@@ -1,6 +1,6 @@
 {
   "name": "pkghub",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "a package hub for human, based on NPM iteself.",
   "main": "dist/pkghub.js",
   "author": "turing <o.u.turing@gmail.com>",

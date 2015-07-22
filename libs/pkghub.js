@@ -99,7 +99,7 @@ export default class pkgHub {
 
         return resolve({
           module: m,
-          filePath: finder.read(m.realPath, filename)
+          file: finder.read(m.realPath, filename)
         })
       }
 

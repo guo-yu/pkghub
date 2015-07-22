@@ -116,7 +116,7 @@ var pkgHub = (function () {
 
           return resolve({
             module: m,
-            filePath: finder.read(m.realPath, filename)
+            file: finder.read(m.realPath, filename)
           });
         }
 
